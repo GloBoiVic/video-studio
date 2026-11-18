@@ -1,5 +1,8 @@
 # Video Studio
 
+> **Paused (2026-11-17).** Development is on hold while OpenFilm is trialled as the primary editor. The code
+> below works and is kept as is. See [docs/adr/0002-pause-development.md](docs/adr/0002-pause-development.md).
+
 An open-source, AI-native video editor for macOS. You direct; a local coding agent (Claude Code or Codex, through
 the CLI you already have installed and signed in to) does the editing. You watch the timeline change live, draw on
 frames to point at mistakes, undo any agent turn, and export 1080p or 4K MP4. It also works as a plain manual editor
