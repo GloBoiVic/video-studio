@@ -1,0 +1,16 @@
+{
+  "id": "lower-third",
+  "name": "Lower third",
+  "description": "Name and title bar that wipes in from the left, holds, and slides out. Full-frame transparent page: place it on a track above the footage.",
+  "kind": "graphic",
+  "duration": 5,
+  "params": {
+    "name": { "type": "text", "label": "Name", "default": "Your Name" },
+    "title": { "type": "text", "label": "Title", "default": "Your title" },
+    "accent": { "type": "color", "label": "Accent", "default": "$brand.accent" },
+    "text": { "type": "color", "label": "Text", "default": "$brand.text" },
+    "background": { "type": "color", "label": "Bar", "default": "$brand.panel" },
+    "position": { "type": "text", "label": "Position (left or right)", "default": "left" }
+  },
+  "version": 1
+}

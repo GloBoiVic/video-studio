@@ -1,0 +1,31 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "video-studio",
+      "runtimeExecutable": "node_modules/.bin/electron",
+      "runtimeArgs": ["."],
+      "port": 47812,
+      "env": {
+        "VIDEO_STUDIO_TOKEN": "dev-preview-token-47812",
+        "VIDEO_STUDIO_LOG": "test-results/app.log",
+        "VIDEO_STUDIO_HOME": "test-results/home",
+        "VIDEO_STUDIO_PROJECTS": "test-results/projects"
+      }
+    },
+    {
+      "name": "video-studio-selftest",
+      "runtimeExecutable": "node_modules/.bin/electron",
+      "runtimeArgs": ["."],
+      "port": 47811,
+      "env": {
+        "VIDEO_STUDIO_SELFTEST": "test-results/selftest.json",
+        "VIDEO_STUDIO_KEEP_OPEN": "1",
+        "VIDEO_STUDIO_HEADLESS": "1",
+        "VIDEO_STUDIO_LOG": "test-results/main.log",
+        "VIDEO_STUDIO_HOME": "test-results/home",
+        "VIDEO_STUDIO_PROJECTS": "test-results/projects"
+      }
+    }
+  ]
+}

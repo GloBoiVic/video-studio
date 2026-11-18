@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script id="studio-params">/*@params*/</script>
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; background: transparent; overflow: hidden; }
+  .wrap { position: absolute; bottom: 12vh; font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif; }
+  .wrap.left { left: 6vw; }
+  .wrap.right { right: 6vw; text-align: right; }
+  .bar { position: relative; padding: 1.6vh 2.6vw 1.8vh 3vw; border-radius: 0.7vh; overflow: hidden; transform-origin: left center; }
+  .right .bar { transform-origin: right center; padding: 1.6vh 3vw 1.8vh 2.6vw; }
+  .accent { position: absolute; top: 0; bottom: 0; width: 0.55vw; }
+  .left .accent { left: 0; }
+  .right .accent { right: 0; }
+  .name { font-weight: 800; font-size: 5.4vh; letter-spacing: -0.02em; white-space: nowrap; line-height: 1.1; }
+  .title { font-weight: 600; font-size: 2.6vh; margin-top: 0.6vh; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.14em; }
+  .clip { overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <div class="bar" id="bar">
+    <div class="accent" id="accent"></div>
+    <div class="clip"><div class="name" id="name"></div></div>
+    <div class="clip"><div class="title" id="title"></div></div>
+  </div>
+</div>
+<script>
+  // An OpenFilm page: frame(t) draws the whole picture for time t, the same every time (no state between calls).
+  const P = Object.assign({
+    name: 'Your Name', title: 'Your title', accent: '#ff5a36', text: '#ffffff',
+    background: 'rgba(14, 16, 22, 0.88)', position: 'left', duration: 5,
+  }, window.PARAMS || {});
+  const $ = (id) => document.getElementById(id);
+  const wrap = $('wrap'), bar = $('bar'), accent = $('accent'), name = $('name'), title = $('title');
+  wrap.className = 'wrap ' + (P.position === 'right' ? 'right' : 'left');
+  name.textContent = P.name;
+  title.textContent = P.title;
+  bar.style.background = P.background;
+  accent.style.background = P.accent;
+  name.style.color = P.text;
+  title.style.color = P.accent;
+
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const outCubic = (x) => 1 - Math.pow(1 - clamp(x), 3);
+  const inCubic = (x) => Math.pow(clamp(x), 3);
+  const span = (t, a, b) => (t - a) / (b - a);
+  const dir = P.position === 'right' ? -1 : 1;
+
+  function frame(t) {
+    const D = P.duration;
+    const outStart = Math.max(1.2, D - 0.55);
+    const wipe = outCubic(span(t, 0.0, 0.55));          // the bar opens
+    const n = outCubic(span(t, 0.25, 0.8));             // the name rises in
+    const ti = outCubic(span(t, 0.4, 0.95));            // the title follows
+    const out = inCubic(span(t, outStart, D));          // everything leaves
+    bar.style.transform = `scaleX(${wipe})`;
+    accent.style.transform = `scaleY(${outCubic(span(t, 0, 0.3))})`;
+    name.style.transform = `translateY(${(1 - n) * 110}%)`;
+    title.style.transform = `translateY(${(1 - ti) * 120}%)`;
+    name.style.opacity = n;
+    title.style.opacity = ti;
+    wrap.style.transform = `translateX(${-dir * out * 40}vw)`;
+    wrap.style.opacity = 1 - out;
+  }
+
+  window.film = { duration: P.duration, ready: () => document.fonts.ready, frame };
+  if (!window.filmHost) {
+    const t0 = performance.now();
+    const loop = () => { frame(((performance.now() - t0) / 1000) % P.duration); requestAnimationFrame(loop); };
+    loop();
+  }
+</script>
+</body>
+</html>
