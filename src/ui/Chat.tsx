@@ -10,7 +10,7 @@ function rich(text: string) {
   );
 }
 
-type AgentInfo = { id: string; label: string; available: boolean; why?: string };
+type AgentInfo = { id: string; label: string; available: boolean; why?: string; models: Array<{ id: string; label: string }> };
 
 export function Chat({ chat, running, attached, setAttached, annotations, onRestore }: {
   chat: ChatMessage[];
@@ -22,6 +22,17 @@ export function Chat({ chat, running, attached, setAttached, annotations, onRest
 }) {
   const [agents, setAgents] = useState<AgentInfo[]>([]);
   const [harness, setHarness] = useState(() => localStorage.getItem('harness') ?? 'claude');
+  // the model per agent, remembered on this Mac; '' = whatever the CLI's own config says
+  const [model, setModelRaw] = useState(() => localStorage.getItem(`model:${localStorage.getItem('harness') ?? 'claude'}`) ?? '');
+  const setModel = (m: string) => {
+    setModelRaw(m);
+    localStorage.setItem(`model:${harness}`, m);
+  };
+  const pickHarness = (h: string) => {
+    setHarness(h);
+    localStorage.setItem('harness', h);
+    setModelRaw(localStorage.getItem(`model:${h}`) ?? '');
+  };
   const [text, setText] = useState('');
   const [err, setErr] = useState('');
   const list = useRef<HTMLDivElement>(null);
@@ -37,7 +48,7 @@ export function Chat({ chat, running, attached, setAttached, annotations, onRest
     if (!text.trim() || running) return;
     setErr('');
     try {
-      await api('agent/send', { harness, text, annotationIds: attached });
+      await api('agent/send', { harness, text, annotationIds: attached, model: model || undefined });
       setText('');
       setAttached([]);
     } catch (e) {
@@ -49,10 +60,15 @@ export function Chat({ chat, running, attached, setAttached, annotations, onRest
   return (
     <div className="chat">
       <div className="chat-head">
-        <select value={harness} onChange={(e) => { setHarness(e.target.value); localStorage.setItem('harness', e.target.value); }} aria-label="Agent">
+        <select value={harness} onChange={(e) => pickHarness(e.target.value)} aria-label="Agent">
           {agents.map((a) => (
             <option key={a.id} value={a.id} disabled={!a.available}>{a.label}{a.available ? '' : ' (not installed)'}</option>
           ))}
+        </select>
+        <select className="model" value={model} onChange={(e) => setModel(e.target.value)} aria-label="Model" title="Model for this agent" disabled={running}>
+          <option value="">CLI default</option>
+          {(current?.models ?? []).map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+          {model && !(current?.models ?? []).some((m) => m.id === model) && <option value={model}>{model}</option>}
         </select>
         <button className="ghost" onClick={() => api('agent/new', { harness })} disabled={running} title="Start a fresh conversation (keeps the film)">New chat</button>
       </div>
@@ -66,7 +82,7 @@ export function Chat({ chat, running, attached, setAttached, annotations, onRest
         )}
         {chat.map((m) => (
           <div key={m.id} className={`msg ${m.role} ${m.status ?? ''}`}>
-            {m.role === 'agent' && <div className="who">{m.harness === 'codex' ? 'Codex' : 'Claude Code'}{m.status === 'running' ? ' · working…' : m.status === 'stopped' ? ' · stopped' : m.status === 'error' ? ' · error' : ''}</div>}
+            {m.role === 'agent' && <div className="who">{m.harness === 'codex' ? 'Codex' : 'Claude Code'}{m.model ? ` · ${m.model}` : ''}{m.status === 'running' ? ' · working…' : m.status === 'stopped' ? ' · stopped' : m.status === 'error' ? ' · error' : ''}</div>}
             {m.annotationIds && m.annotationIds.length > 0 && <div className="chips">{m.annotationIds.map((id) => <span key={id} className="chip">📍 {id}</span>)}</div>}
             {m.text && <div className="text">{rich(m.text)}</div>}
             {m.tools && m.tools.length > 0 && (

@@ -24,7 +24,7 @@ export type Project = {
   access: { readRoots: string[] };
   previewOrigin: string;
 };
-export type ChatMessage = { id: string; role: 'person' | 'agent' | 'system'; harness?: string; text: string; at: string; status?: string; checkpointId?: string; annotationIds?: string[]; tools?: Array<{ name: string; ok?: boolean; summary?: string }>; cost?: number };
+export type ChatMessage = { id: string; role: 'person' | 'agent' | 'system'; harness?: string; model?: string; text: string; at: string; status?: string; checkpointId?: string; annotationIds?: string[]; tools?: Array<{ name: string; ok?: boolean; summary?: string }>; cost?: number };
 export type Template = { id: string; name: string; description: string; duration: number | null; params: Record<string, { type: string; label?: string; default?: string | number }>; source: string };
 export type ExportJob = { id: string; preset: string; status: string; frame: number; frames: number; phase: string; out?: string; error?: string; seconds?: number };
 export type State = {

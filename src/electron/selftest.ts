@@ -248,6 +248,9 @@ export async function runSelfTest(studio: Studio, { reportFile, appRoot }: { rep
 
   // ---- optional: a real agent, through its own CLI ----
   const harness = process.env.VIDEO_STUDIO_SELFTEST_AGENT;
+  // tests run on the cheapest capable model of each agent, never the most expensive (override: VIDEO_STUDIO_SELFTEST_MODEL)
+  const TEST_MODELS: Record<string, string> = { codex: 'gpt-6-luna', claude: 'haiku' };
+  const model = process.env.VIDEO_STUDIO_SELFTEST_MODEL || (harness ? TEST_MODELS[harness] : undefined);
   if (harness) {
     const waitTurn = () =>
       new Promise<void>((done) => {
@@ -263,7 +266,7 @@ export async function runSelfTest(studio: Studio, { reportFile, appRoot }: { rep
       const s = studio.need();
       const r0 = s.revision;
       const wait = waitTurn();
-      await studio.send({ harness, text: 'Add a lower third from the library for "Grace Hopper", title "Computer scientist", from 4.2 s for 2.5 s on the top track. Then look at 5 s to check it.' });
+      await studio.send({ harness, model, text: 'Add a lower third from the library for "Grace Hopper", title "Computer scientist", from 4.2 s for 2.5 s on the top track. Then look at 5 s to check it.' });
       await wait;
       const reply = studio.chat.at(-1)!;
       assert(reply.status === 'done', `turn ended ${reply.status}: ${reply.text}`);
@@ -276,7 +279,7 @@ export async function runSelfTest(studio: Studio, { reportFile, appRoot }: { rep
       const grace = Object.values(s.graphics).find((g) => JSON.stringify(g.params ?? {}).includes('Grace'));
       const ann = await studio.annotate({ t: 5.2, clips: [], note: 'Make this lower third appear on the RIGHT side of the frame instead of the left.', shapes: [{ kind: 'arrow', x1: 500, y1: 880, x2: 1500, y2: 880 }] });
       const wait = waitTurn();
-      await studio.send({ harness, text: 'Fix my annotation.', annotationIds: [ann.id] });
+      await studio.send({ harness, model, text: 'Fix my annotation.', annotationIds: [ann.id] });
       await wait;
       const reply = studio.chat.at(-1)!;
       const after = s.annotations.find((a) => a.id === ann.id)!;

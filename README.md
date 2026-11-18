@@ -37,8 +37,9 @@ npm run selftest
 An end-to-end run inside the real Electron app. It drives the same MCP path a real agent uses, with the language model
 scripted. It covers rough cut, stale-write refusal, template graphic, look, annotation, fix, checkpoint/undo/redo,
 reusing a template in a second project, 1080p and 4K export with pixel checks, and raw media unchanged. The report goes
-to `test-results/selftest.json`. Add `VIDEO_STUDIO_SELFTEST_AGENT=claude` to also run two turns with your real Claude
-Code.
+to `test-results/selftest.json`. Add `VIDEO_STUDIO_SELFTEST_AGENT=claude` (or `codex`) to also run two turns with your
+real agent. Live tests use the cheapest model of each agent: Haiku for Claude, GPT-6-Luna for Codex. Set
+`VIDEO_STUDIO_SELFTEST_MODEL` to override that.
 
 ## How it works
 
@@ -65,6 +66,10 @@ Code.
   - Claude Code runs with only Read/Glob/Grep plus these tools. Codex runs with `--sandbox read-only`.
   - Every write carries the revision the agent last read. If you changed something in between, the write is refused
     and the agent re-reads.
+- **Model picker.** It sits next to the agent menu in the chat and is remembered per agent. "CLI default" uses the CLI's
+  own config. Claude offers Opus, Sonnet and Haiku. Codex offers the models from its own cache
+  (`~/.codex/models_cache.json`; only model names are read). Some listed models may not be allowed on your plan. When
+  the account refuses a model, the chat says so and asks you to pick another.
 - **Undo.** Every edit is one undo step, labelled with who made it. Before each agent turn the app saves a
   checkpoint; **Undo this turn** in the chat restores it, and that restore can itself be undone.
 - **Annotations.** Use Mark up (circle, arrow, box, pen) on the preview, then add a note. The agent receives the note's

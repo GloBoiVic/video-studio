@@ -104,3 +104,28 @@ describe('agent tools', () => {
     expect(s.summary().tracks[1].clips[0].src).toMatch(/^graphics\/lower-third-/);
   });
 });
+
+describe('agent models', () => {
+  it('lists Codex models from its cache (hidden ones left out) and accepts only model-like names', async () => {
+    const { codex, claude, MODEL_ID } = await import('../src/server/agents.js');
+    const home = tmp();
+    const { writeFileSync } = await import('node:fs');
+    writeFileSync(join(home, 'models_cache.json'), JSON.stringify({ models: [
+      { slug: 'model-b', display_name: 'Model B', visibility: 'list', priority: 2 },
+      { slug: 'model-a', display_name: 'Model A', visibility: 'list', priority: 1 },
+      { slug: 'secret', visibility: 'hide', priority: 0 },
+      { slug: '--evil flag', visibility: 'list', priority: 3 },
+    ] }));
+    const before = process.env.CODEX_HOME;
+    process.env.CODEX_HOME = home;
+    try {
+      expect(await codex.models()).toEqual([{ id: 'model-a', label: 'Model A' }, { id: 'model-b', label: 'Model B' }]);
+    } finally {
+      if (before === undefined) delete process.env.CODEX_HOME;
+      else process.env.CODEX_HOME = before;
+    }
+    expect((await claude.models()).map((m) => m.id)).toEqual(['opus', 'sonnet', 'haiku']);
+    for (const ok of ['sonnet', 'gpt-6.2-sol', 'claude-opus-5-5', 'org/model:tag']) expect(MODEL_ID.test(ok)).toBe(true);
+    for (const bad of ['', '--help', 'a b', 'x;rm -rf /', '-m']) expect(MODEL_ID.test(bad)).toBe(false);
+  });
+});
