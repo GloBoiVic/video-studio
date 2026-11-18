@@ -84,7 +84,7 @@ real agent. Live tests use the cheapest model of each agent: Haiku for Claude, G
 | macOS desktop app | Runs from source (`npm start`). Not packaged or signed yet. |
 | Preview, timeline, agent chat | Works: play, scrub, move/trim/split/delete, mute/lock tracks, live updates |
 | Import into an isolated project | Works: copied, hashed, read-only, checked unchanged after a full session |
-| Agent edits visible on the timeline | Verified with real Claude Code: rough cut, lower third, look, all live |
+| Agent edits visible on the timeline | Verified with real Claude Code (rough cut, lower third, look) and Codex on GPT-6-Luna (volume change, look) |
 | Annotation the agent acts on | Verified with real Claude Code: circled a lower third, asked to move and rename it, fixed and resolved |
 | Reusable animated graphic | `lower-third` template plus brand colors. Saved as a user template and reused in a second project |
 | Undo / checkpoints | Per-edit undo/redo; per-turn checkpoints; restore is undoable; history survives restart |
@@ -92,14 +92,13 @@ real agent. Live tests use the cheapest model of each agent: Haiku for Claude, G
 
 ## Not proven yet
 
-- **Codex turns.** The adapter starts Codex and streams its events. The one test failed on the account side: the
-  local Codex config selects a model that this ChatGPT plan can't use. A turn that edits the film has not completed
-  yet.
 - **Long or heavy projects.** Only tested on films under 10 s with two clips. Speed for long 4K exports, many tracks or
   big pages is unknown. Export draws one frame at a time in one window.
 - **Preview sound.** Synced by simple `<audio>` elements, with no fades during preview. Exports mix sound properly.
 - **Packaging.** No `.app` bundle, code signing, auto-update or bundled ffmpeg yet. Electron has to be downloaded by
   `npm install`.
+- **Codex depth.** Codex has only done one small edit; it hasn't fixed an annotation yet. Several models in Codex's
+  own list are refused on a ChatGPT plan. The chat explains this and you pick another model.
 - **Pausing an agent.** Stop ends the turn; you then redirect with a new message. A true pause/resume mid-turn isn't
   available.
 - **Edits made outside the app.** Changing `film.html` in another app while Video Studio is open isn't picked up. The

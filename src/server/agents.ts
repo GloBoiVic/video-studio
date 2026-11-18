@@ -193,6 +193,8 @@ export const codex: Harness = {
       '-c', `mcp_servers.studio.args=[${o.mcp.args.map(toml).join(', ')}]`,
       '-c', `mcp_servers.studio.env=${env}`,
       '-c', 'mcp_servers.studio.tool_timeout_sec=600',
+      // the studio tools are the app's own checked write path: pre-approved, since exec mode cannot ask (approval "never")
+      '-c', 'mcp_servers.studio.default_tools_approval_mode="approve"',
       '-c', 'approval_policy="never"',
       ...(o.model ? ['-m', o.model] : []),
     ];
